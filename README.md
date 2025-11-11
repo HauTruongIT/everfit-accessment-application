@@ -46,7 +46,6 @@ This workflow file implements the full CI/CD pipeline for the development enviro
 
 - Installs dependencies using Yarn.
 - Builds the Next.js application.
-- Packages the app into a Docker image.
 
 ### 2. Test
 
@@ -60,30 +59,6 @@ This workflow file implements the full CI/CD pipeline for the development enviro
 - Updates the image tag in the relevant Helm values file (e.g., `dev/demo-app.yaml`).
 - Creates a Pull Request in the infrastructure repo with the new tag.
 - Once the PR is merged, the infrastructure repo pipeline deploys the new image to Kubernetes.
-
-#### Example Workflow Snippet
-
-```yaml
-on:
-	push:
-		branches: [ main ]
-
-jobs:
-	build:
-		steps:
-			- run: yarn install --frozen-lockfile --silent
-			- run: yarn build
-			- run: docker build -t $IMAGE_TAG .
-	test:
-		steps:
-			- run: yarn test
-	push-to-ecr:
-		steps:
-			- run: docker push $IMAGE_TAG
-	update-infra:
-		steps:
-			- run: gh pr create --repo HauTruongIT/everfit-assessment-infrastructure ...
-```
 
 #### Required Environment Variables / Secrets
 
