@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Everfit Assessment Application
 
-First, run the development server:
+This repository is a microservice example for the Everfit technical assessment, implemented with Next.js. It demonstrates modern CI/CD automation, containerization, and integration with a centralized deployment system.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Overview
+
+- **Purpose:** Example microservice for assessment, built with Next.js.
+- **Scope:** Application code, Dockerfile, and CI pipeline. Deployment is managed externally.
+
+## CI/CD Pipeline Flow
+
+On every push to the `main` branch, the GitHub Actions pipeline is triggered. The pipeline automates the following stages:
+
+---
+
+## About `.github/workflows/dev.yml`
+
+This workflow file implements the full CI/CD pipeline for the development environment:
+
+- **Trigger:** Runs on every push to `main`.
+- **Build:** Installs dependencies, builds the app, and creates a Docker image.
+- **Test:** Runs unit tests (if defined in `package.json`).
+- **Deploy:** Pushes the image to ECR, then updates the image tag in the infrastructure repository (`dev/demo-app.yaml`).
+- **Automation:** Automatically creates and merges a PR in the infrastructure repo, ensuring the new image is deployed to the Kubernetes dev namespace.
+
+### Key Secrets Required
+
+| Name                    | Description                                 |
+|-------------------------|---------------------------------------------|
+| `AWS_ACCESS_KEY_ID`     | AWS credentials for ECR push                |
+| `AWS_SECRET_ACCESS_KEY` | AWS credentials for ECR push                |
+| `AWS_REGION`            | AWS region for ECR                          |
+| `ECR_REGISTRY`          | ECR registry URL                            |
+| `ECR_REPOSITORY`        | ECR repository name                         |
+| `INFRA_REPO_TOKEN`      | GitHub token with write access to infra repo|
+
+### Tools Used
+
+- [`yq`](https://github.com/mikefarah/yq) for YAML editing
+- [GitHub CLI (`gh`)](https://cli.github.com/) for PR creation and merging
+
+---
+
+### 1. Build
+
+- Installs dependencies using Yarn.
+- Builds the Next.js application.
+- Packages the app into a Docker image.
+
+### 2. Test
+
+- Runs unit tests (ensure a `test` script exists in `package.json`).
+- Fails the pipeline if tests do not pass.
+
+### 3. Deploy
+
+- Pushes the built Docker image to Amazon ECR.
+- Automatically clones the [`everfit-assessment-infrastructure`](https://github.com/HauTruongIT/everfit-assessment-infrastructure) repository.
+- Updates the image tag in the relevant Helm values file (e.g., `dev/demo-app.yaml`).
+- Creates a Pull Request in the infrastructure repo with the new tag.
+- Once the PR is merged, the infrastructure repo pipeline deploys the new image to Kubernetes.
+
+#### Example Workflow Snippet
+
+```yaml
+on:
+	push:
+		branches: [ main ]
+
+jobs:
+	build:
+		steps:
+			- run: yarn install --frozen-lockfile --silent
+			- run: yarn build
+			- run: docker build -t $IMAGE_TAG .
+	test:
+		steps:
+			- run: yarn test
+	push-to-ecr:
+		steps:
+			- run: docker push $IMAGE_TAG
+	update-infra:
+		steps:
+			- run: gh pr create --repo HauTruongIT/everfit-assessment-infrastructure ...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### Required Environment Variables / Secrets
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Name                    | Description                                 |
+|-------------------------|---------------------------------------------|
+| `AWS_ACCESS_KEY_ID`     | AWS credentials for ECR push                |
+| `AWS_SECRET_ACCESS_KEY` | AWS credentials for ECR push                |
+| `AWS_REGION`            | AWS region for ECR                          |
+| `ECR_REGISTRY`          | ECR registry URL                            |
+| `ECR_REPOSITORY`        | ECR repository name                         |
+| `INFRA_REPO_TOKEN`      | GitHub token with write access to infra repo|
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Separation of Concerns
 
-## Learn More
+- **Application repo:** Handles CI (build, test, image push, PR creation).
+- **Infrastructure repo:** Handles CD (deployment to Kubernetes).
 
-To learn more about Next.js, take a look at the following resources:
+## Benefits
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Developer velocity:** Developers only push code; deployment is automated.
+- **Reduced manual steps:** No need to manually update deployment manifests or trigger deployments.
+- **Auditability:** All changes are tracked via PRs and CI logs.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
