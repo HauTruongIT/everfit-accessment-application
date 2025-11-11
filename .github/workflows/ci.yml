@@ -20,11 +20,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies (yarn)
-        working-directory: demo-app
+        working-directory: .
         run: yarn install --frozen-lockfile --silent
 
       - name: Build (yarn)
-        working-directory: demo-app
+        working-directory: .
         run: yarn build
 
   test:
@@ -40,12 +40,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies (yarn)
-        working-directory: demo-app
+        working-directory: .
         run: yarn install --frozen-lockfile --silent
 
       - name: Run tests
-        working-directory: demo-app
-        # This expects a `test` script in demo-app/package.json
+        working-directory: .
+        # This expects a `test` script in ./package.json
         run: |
           if yarn run | grep -q " test "; then
             yarn test
@@ -75,7 +75,7 @@ jobs:
         run: |
           IMAGE_BASE=${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}
           docker build \
-                -f ./demo-app/Dockerfile \
+                -f ./Dockerfile \
                 -t $IMAGE_BASE:latest .
           docker push $IMAGE_BASE:latest
 
