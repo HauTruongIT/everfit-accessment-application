@@ -1,8 +1,8 @@
-name: CI — Build / Test / Push to ECR
+name: SIT CI — Build / Test / Push to ECR
 
 on:
   push:
-    branches: [ main ]
+    branches: [ sit ]
 
 env:
   NODE_VERSION: '20'
@@ -105,9 +105,9 @@ jobs:
           SHORT_SHA=$(git rev-parse --short=6 HEAD)
           echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
 
-      - name: Update image tag in dev/demo-app.yaml
+      - name: Update image tag in sit/demo-app.yaml
         run: |
-          cd infra/dev
+          cd infra/sit
           yq e '.image.tag = "${{ env.SHORT_SHA }}"' -i demo-app.yaml
 
       - name: Commit and push changes
@@ -116,7 +116,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git checkout -b update-image-tag-${{ env.SHORT_SHA }}
-          git add dev/demo-app.yaml
+          git add sit/demo-app.yaml
           git commit -m "Update demo-app image tag to ${{ env.SHORT_SHA }}"
           git push origin HEAD
 
