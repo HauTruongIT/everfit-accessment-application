@@ -72,15 +72,13 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./demo-app
-          file: ./demo-app/Dockerfile
-          push: true
-          tags: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          IMAGE_BASE=${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}
+          docker build \
+                -f ./demo-app/Dockerfile \
+                -t $IMAGE_BASE:latest .
+          docker push $IMAGE_BASE:latest
 
       - name: Image URI
         run: |
-          echo "Image pushed: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}"
+          echo "Image pushed: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest"
