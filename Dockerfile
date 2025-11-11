@@ -3,7 +3,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # copy package files and install dependencies (using Yarn)
-COPY demo-app/package.json demo-app/yarn.lock* ./
+COPY package.json yarn.lock* ./
 RUN yarn install --frozen-lockfile --silent
 
 # copy source and build
