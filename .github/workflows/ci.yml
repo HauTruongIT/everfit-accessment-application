@@ -19,13 +19,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
+      - name: Install dependencies (yarn)
         working-directory: demo-app
-        run: npm ci
+        run: yarn install --frozen-lockfile --silent
 
-      - name: Build
+      - name: Build (yarn)
         working-directory: demo-app
-        run: npm run build
+        run: yarn build
 
   test:
     name: Run unit tests
@@ -39,16 +39,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
+      - name: Install dependencies (yarn)
         working-directory: demo-app
-        run: npm ci
+        run: yarn install --frozen-lockfile --silent
 
       - name: Run tests
         working-directory: demo-app
         # This expects a `test` script in demo-app/package.json
         run: |
-          if npm run | grep -q " test "; then
-            npm run test
+          if yarn run | grep -q " test "; then
+            yarn test
           else
             echo "No test script found in package.json — skipping tests (to enable, add a \"test\" script)."
           fi

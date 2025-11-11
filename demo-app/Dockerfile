@@ -2,13 +2,13 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# copy package files and install dependencies
-COPY package.json package-lock.json* ./
-RUN npm ci --silent
+# copy package files and install dependencies (using Yarn)
+COPY package.json yarn.lock* ./
+RUN yarn install --frozen-lockfile --silent
 
 # copy source and build
 COPY . .
-RUN npm run build
+RUN yarn build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -18,4 +18,4 @@ ENV NODE_ENV=production
 COPY --from=builder /app/ .
 
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["yarn", "start"]
