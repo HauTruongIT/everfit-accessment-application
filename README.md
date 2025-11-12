@@ -76,10 +76,35 @@ This workflow file implements the full CI/CD pipeline for the development enviro
 - **Application repo:** Handles CI (build, test, image push, PR creation).
 - **Infrastructure repo:** Handles CD (deployment to Kubernetes).
 
-## Benefits
 
-- **Developer velocity:** Developers only push code; deployment is automated.
-- **Reduced manual steps:** No need to manually update deployment manifests or trigger deployments.
-- **Auditability:** All changes are tracked via PRs and CI logs.
+## Directory Structure
 
----
+```
+everfit-assessment-application/
+├── app/                  # Next.js application source (pages, layout, styles)
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── public/               # Static assets (SVGs, images)
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── .github/
+│   └── workflows/        # GitHub Actions workflows
+│       ├── dev.yml       # Dev CI/CD pipeline
+│       └── sit.yml       # SIT CI/CD pipeline
+├── Dockerfile            # Container build instructions
+├── .dockerignore         # Docker build exclusions
+├── package.json          # Project dependencies and scripts
+├── yarn.lock             # Yarn lockfile
+├── tsconfig.json         # TypeScript configuration
+├── next.config.ts        # Next.js configuration
+├── postcss.config.mjs    # PostCSS configuration
+├── eslint.config.mjs     # ESLint configuration
+├── next-env.d.ts         # Next.js TypeScript env
+├── README.md             # Project documentation
+└── node_modules/         # Installed dependencies
+```
